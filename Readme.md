@@ -16,6 +16,7 @@ This repository contains two different projects built with Hardhat and Foundry.
 | Test files                          | Solidity contracts                                                                          | JavaScript test files                                                               |
 | Test assertion library (default)    | ds-test                                                                                     | Mocha                                                                               |
 | Allows run specific tests?          | Yes via --match-test --match-contract                                                       | Yes via "only" or "skip" in test files                                              |
+| Allows deployments?                 | Yes, via forge CLI                                                                          | Yes, via JS scripts                                                                 |
 
 ## Testing with Foundry
 

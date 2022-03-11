@@ -15,13 +15,15 @@ Found [this gitHub issue](https://github.com/gakonst/foundry/discussions/481) wi
 
 ## Project structure
 
-After creating the project, foundry generates a `foundry.toml` file, which is similart to Hardhat's `hardhat.config.js`. In it, you can define the contract source folder, where to output the compiled artifacts etc.
+After creating the project, Foundry generates a `foundry.toml` file, which is similart to Hardhat's `hardhat.config.js`. In it, you can define the contract source folder, where to output the compiled artifacts etc.
 
 The remappings is one of the most important things we can configure here and it's used to manage dependency imports.
 
-### Dependencies
+## Dependencies
 
-Dependencies are installed with `forge install` and saves them in the `lib` folder. Foundry uses Git submodules to handle dependencies which means you can **install as a dependency any repository** that has smart contracts. To install a dependency you'll have to run `forge install GitHub-Organization-name/repository-name`. For example, if you want to install Openzeppelin smart contracts, you'll to run `forge install OpenZeppelin/openzeppelin-contracts`.
+Hardhat uses NPM to manage dependencies, which all its pros and cons. If you're familiar with Node.js or Javascript projects, you'll know how it works.
+
+In Foundry, dependencies are installed with `forge install`, which saves them in the `lib` folder. Foundry uses Git submodules to handle dependencies which means you can **install as a dependency any repository** that has smart contracts. To install a dependency you'll have to run `forge install GitHub-Organization-name/repository-name`. For example, if you want to install Openzeppelin smart contracts, you'll to run `forge install OpenZeppelin/openzeppelin-contracts`.
 
 We can also install a specific branch or tag appending `@tag-name` to the dependency name.
 
@@ -51,15 +53,17 @@ contract Contract is ERC20 {
 
 ```
 
-### Logging
+## Logging
 
-One of the tricky things coming from Hardhat is using `console.log()`. With Hardhat, you can import this contract library that provides methods to print in the terminal which is super useful. But obviously, if you try to compile a Hardhat contract that uses the `console.log`, you 'll get an error as the dependency is not there. You could install it as a dependency (which you can do via `forge install NomicFoundation/hardhat` and import it from [_/packages/hardhat-core/console.sol_](https://github.com/NomicFoundation/hardhat/blob/master/packages/hardhat-core/console.sol)) but [the recommended option](https://github.com/gakonst/foundry/tree/master/forge#consolelog) is to copy [this contract](https://github.com/gakonst/foundry/blob/master/evm-adapters/testdata/console.sol) into your project, and import it wherever you want to use `console.log`. It's not ideal, but they'll come up with a better option soon.
+One of the tricky things coming from Hardhat is using `console.log()`.
 
-If you just need to write logs in your test files, you don't need any other dependencies. The included-by-default [DSTest contract](https://github.com/dapphub/ds-test/blob/master/src/test.sol), comes with assertions and logging events so you just need to emit any of the available events, like `emit log_string()` or `emit log_int()`, `emit log_address()` etc. :
+With Hardhat, you can import this contract library that provides methods to print in the terminal which is super useful. But obviously, if you try to compile a Hardhat contract that uses the `console.log`, you 'll get an error as the dependency is not there. You could install it as a dependency (which you can do via `forge install NomicFoundation/hardhat` and import it from [_/packages/hardhat-core/console.sol_](https://github.com/NomicFoundation/hardhat/blob/master/packages/hardhat-core/console.sol)) but [the recommended option](https://github.com/gakonst/foundry/tree/master/forge#consolelog) is to copy [this contract](https://github.com/gakonst/foundry/blob/master/evm-adapters/testdata/console.sol) into your project, and import it wherever you want to use `console.log`. It's not ideal, but they'll come up with a better option soon.
+
+**If you just need to write logs in your test files, you don't need any dependencies.** The included-by-default [DSTest contract](https://github.com/dapphub/ds-test/blob/master/src/test.sol), comes with assertions and logging events so you just need to emit any of the available events, like `emit log_string()` or `emit log_int()`, `emit log_address()` etc.
 
 ## Hardhat vs Foundry: Writting Tests
 
-Testing is probably on the the most different aspects between Hardhat and Foundry. To compare them, I've created a basic smart contract that simulates a bank and allow users to open accounts, deposit and withdraw ether, close the account, and return the number of active accounts. You can [find the code here]().
+Testing is probably on the the most different aspects between Hardhat and Foundry. To compare them, I created a basic smart contract that simulates a bank and allow users to open accounts, deposit and withdraw ether, close the account, and return the number of active accounts. You can [find the code here]().
 
 In Hardhat, you write your tests in Javascript using the _describe_ and _it_ keywords to define all different scenarios, and use Mocha as the default assertion library. Using Hardhat, this would be a testing file for the MiniBank contract:
 
@@ -204,9 +208,9 @@ Tests print out the gas used 👌
 
 To compile, run `forge build`
 
-Differences
+## All differences
 
-| Caracteristinc                      | Foundry                                                                                     | Hardhat                                                                             |
+|                                     | Foundry                                                                                     | Hardhat                                                                             |
 | ----------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | Installation                        | via CLI curl command                                                                        | via NPM or not required with NPX                                                    |
 | CLI tools                           | **forge** to manage the project (build/compile) & **cast** to interact with smart contracts | **hardhat** manage the project (build/compile)                                      |

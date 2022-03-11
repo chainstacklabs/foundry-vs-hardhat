@@ -1,6 +1,6 @@
 # Hardhat vs Foundry
 
-This repository contains two different projects built with Hardhat and Foundry.
+This repository contains two similar projects built with Hardhat and Foundry.
 
 ## Differences
 

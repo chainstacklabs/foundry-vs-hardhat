@@ -1,3 +1,6 @@
 .DS_Store
 .vscode
 node_modules
+demo-foundry
+demo-hardhat
+cache

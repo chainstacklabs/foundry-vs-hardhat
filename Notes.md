@@ -201,24 +201,51 @@ Here is a list of what I consider pros and cons writing tests with Foundry:
 
 ### Running tests
 
-![](./img/foundry-run-tests.jpeg)
-Tests print out the gas used 👌
+When it comes to running the tests, the first thing I noticed was how fast Foundry was. I've used the same contract with the same number of tests and same scenarios, the only difference was that I wrote the tests for the Hardhat project in Javascript while I wrote them in Solidity for Foundry.
 
-### Compile
+I removed the cache folders in both before measuring how long it took to compile the contract an run the project and the difference was huge:
 
-To compile, run `forge build`
+![Foundry vs Hardhat tests benchmark](./img/foundry-vs-hardhat-benchmark.jpg)1.44secs vs 5.17secs
 
-## All differences
+**Foundry took 1.44 seconds to compile the contract and run all the tests, while Hardhat took 5.17 seconds.** Keeping the cache folders, the difference is huge as well: Foundry took 0.45 seconds (almost instant), while Hardhat took 3.98 seconds.
 
-|                                     | Foundry                                                                                     | Hardhat                                                                             |
-| ----------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Installation                        | via CLI curl command                                                                        | via NPM or not required with NPX                                                    |
-| CLI tools                           | **forge** to manage the project (build/compile) & **cast** to interact with smart contracts | **hardhat** manage the project (build/compile)                                      |
-| Configuration file                  | foundry.toml                                                                                | hardhat.config.js                                                                   |
-| Allows project folder configuration | Yes, in foundry.toml file                                                                   | Yes, in hardhat.config.js file                                                      |
-| Dependency management               | GitHub submodules (any repository)                                                          | NPM packages                                                                        |
-| Dependency configuration            | remappings allowed in foundry.toml or remappings.txt file                                   | N/A                                                                                 |
-| Files included in sample project    | empty smart contract and basic test                                                         | Greeter smart contract (with set/get methods), test files and script to run locally |
-| Test files                          | Solidity contracts                                                                          | JavaScript test files                                                               |
-| Test assertion library (default)    | ds-test                                                                                     | Mocha                                                                               |
-| Allows run specific tests?          | Yes via --match-test --match-contract                                                       | Yes via "only" or "skip" in test files                                              |
+In a small project like this, the difference may not be that important but in bigger projects it can make a difference.
+
+I also wanted to try compiling a larger project, so I cloned [GEB](https://github.com/reflexer-labs/geb), which has 26 smart contracts. I had to reorganise the project files and install all the dependencies but I was able to time how long it took to compile all the contracts in both cases. **With Hardhat, it took 14.56 seconds and with Foundry it took 8.53 seconds 💨**
+
+## Deploying contracts
+
+One of the aspects I like about Hardhat is that you can write deployment scripts in Javascript and target different networks, or use the `dotenv` package to load the RPC endpoints and private keys from environment variables. It makes deployments easy to write and to share.
+
+In Foundry, deployments are run from the CLI like this: `$ forge create --rpc-url <your_rpc_url> --private-key <your_private_key> src/MyContract.sol:MyContract` which is not ideal. And if you need to pass some arguments to the contract's constructor, this gets completly out of hand: `$ forge create --rpc-url <your_rpc_url> --constructor-args "MyToken" "MTKN" 18 1000000000000000000000 --private-key <your_private_key> src/MyToken.sol:MyToken`.
+
+I asked about a more convenient approach to this in the Foundry Telegram channel and they mentioned that I could create a bash script. I even found [a GitHub repo](https://github.com/smartcontractkit/foundry-starter-kit) (credits to [Patrick Collins](https://twitter.com/PatrickAlphaC)) with some step-by-step scripts to make the deployment a little bit easier.
+In addition, **[the team is working on new ways to deploy contracts](https://github.com/gakonst/foundry/issues/402#issuecomment-1022530001)** and even make deployments available in the tests in order to, for example, run some tests against a contract after it's being deployed.
+
+It sounds great and I'm sure the team will have something move convinient really soon.
+
+##
+
+### Final thoughts
+
+Foundry is still evolving but looks promising. Performance is awesome, there is a great and very active community around the project and [their Telegram channel](https://t.me/foundry_rs) is filled with discussions about new features and how to make it a better development tool.
+
+It's not 100% complete and I've seen some people mention that they use Foundry to develop the contracts and write the tests, and at the same time use Hardhat for scripting and deployments.
+
+If you're want to give it a try, make sure to join [the Foundry Telegram channel](https://t.me/foundry_rs), [the support channel](https://t.me/foundry_support), read the [Foundry book to learn how to start using it](https://onbjerg.github.io/foundry-book/) and keep an eye on [the public GitHub repository](https://github.com/gakonst/foundry).
+
+## Summary of differences
+
+|                                                          | Foundry                                                                                     | Hardhat                                                                             |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --- |
+| Installation                                             | via CLI curl command                                                                        | via NPM or not required with NPX                                                    |
+| CLI tools                                                | **forge** to manage the project (build/compile) & **cast** to interact with smart contracts | **hardhat** manage the project (build/compile)                                      |
+| Configuration file                                       | foundry.toml                                                                                | hardhat.config.js                                                                   |
+| Allows project folder configuration                      | Yes, in foundry.toml file                                                                   | Yes, in hardhat.config.js file                                                      |
+| Dependency management                                    | GitHub submodules (any repository)                                                          | NPM packages                                                                        |     |
+| Files included in sample project                         | empty smart contract and basic test                                                         | Greeter smart contract (with set/get methods), test files and script to run locally |
+| Test file format                                         | Solidity contracts                                                                          | JavaScript test files                                                               |
+| Test assertion library (default)                         | ds-test                                                                                     | Mocha                                                                               |
+| Allows to alter blockchain status (time, block) in tests | Yes via cheatcodes                                                                          | Limited, via mainnetforking.                                                        |
+| Allows run specific tests?                               | Yes via --match-test --match-contract                                                       | Yes via "only" or "skip" in test files                                              |
+| Allows deployments?                                      | Yes, via forge CLI or Bash scripts (new solutions in progress)                              | Yes, via JS scripts                                                                 |

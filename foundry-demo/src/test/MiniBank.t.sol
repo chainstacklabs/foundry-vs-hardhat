@@ -62,6 +62,16 @@ contract MiniBankTest is DSTest {
         assertEq(1 ether, minibank.checkBalance());
     }
 
+    function testAllowUserCloseAndUpdateAccCounter() public {
+        minibank.openAccount();
+        // changes users
+        vm.prank(address(1));
+        minibank.openAccount();
+        assertEq(2, minibank.accountsOpened());
+        minibank.closeAccount();
+        assertEq(1, minibank.accountsOpened());
+    }
+
     function testCannotWithdrawWithoutAccount() public {
         vm.expectRevert("MiniBank: User does not have an account");
         minibank.withdraw(1 ether);

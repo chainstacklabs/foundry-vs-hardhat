@@ -4,6 +4,8 @@ out = 'out'
 libs = ['lib']
 remappings = ['ds-test/=lib/ds-test/src/', 
 # 'openzeppelin-contracts/=lib/openzeppelin-contracts/'
+ 'openzeppelin-erc20/=lib/openzeppelin-contracts/contracts/token/ERC20/'
+
 ]
 
 # See more config options https://github.com/gakonst/foundry/tree/master/config

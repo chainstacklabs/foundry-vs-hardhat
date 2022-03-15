@@ -1,71 +1,84 @@
-Installation is pretty simple although is via CLI with [instructions here](https://onbjerg.github.io/foundry-book/getting-started/installation.html)
+I've been using Hardhat since my first Solidity project. I wasn't sold on the idea of working on an online IDE like Remix, and Hardhat was the most recommended option (although Truffle was close behind). After some months using it for almost all my solidity projects, I'm pretty used to how it works, how the different networks and project folders can be configured, how to write tests and I've even came up with an almost perfect (for me at least 😉) project structure that I always use when I want to create a web 3 app.
 
-To scaffold a new projet run `forge init my-project-name`. I got the following error:
+A few weeks ago, one of my team mates talked to me about Foundry and performance was its main selling point. Here at Chainstack we've published [an article a few monsth ago](https://chainstack.com/foundry-a-fast-solidity-contract-development-toolkit/), where we explained how to install it and gave a quick overview.
 
-```sh
+It really picked my curiosity so I decided to [install it](https://onbjerg.github.io/foundry-book/getting-started/installation.html) and [created a quick project](https://onbjerg.github.io/foundry-book/forge/creating-a-new-project.html) to **compare the differences buiding the same project and in perfomance between Foundry and Hardhat**.
 
-forge init demo                          ABRT ✘
-dyld: Library not loaded: /usr/local/opt/libusb/lib/libusb-1.0.0.dylib
-  Referenced from: /Users/antonio/.foundry/bin/forge
-  Reason: image not found
-[1]    41994 abort      forge init demo
-```
+By the way, if you get the error **Library not loaded: /usr/local/opt/libusb/lib/libusb-1.0.0.dylib** when creating your first project, just run `brew install libusb` to fix it (detailed [here](https://github.com/gakonst/foundry/discussions/481)).
 
-Found [this gitHub issue](https://github.com/gakonst/foundry/discussions/481) with a fix, just install the required library with `brew install libusb`. After that, `forge init` worked just fine.
+## Project structure and configuration
 
-## Project structure
+After creating the project, Foundry generates a `foundry.toml` file. It's based on key-value pairs, and serves as a configuration file similar to Hardhat's `hardhat.config.js` . In it, you can define the contracts source folder, where to output the compiled artifacts etc.
 
-After creating the project, Foundry generates a `foundry.toml` file, which is similart to Hardhat's `hardhat.config.js`. In it, you can define the contract source folder, where to output the compiled artifacts etc.
+Here are the default folders with both:
 
-The remappings is one of the most important things we can configure here and it's used to manage dependency imports.
+| Folder         | Foundry   | Hardhat       |
+| -------------- | --------- | ------------- |
+| Contract files | /src      | /contracts    |
+| Test files     | /src/test | /test         |
+| Output         | /out      | /artifacts    |
+| Dependencies   | /lib      | /node_modules |
 
-## Dependencies
+One of the main differences in the configuration file is that **in Hardhat you can add multiple networks, which can be used later on to deploy our contracts.** In Foundry, that's currently not possible. Most of the additional parameters that you can add in the `foundry.toml` file are related to the tests (verbosity,account, balance, gas price, etc). You can find more info about the [advanced config parameters here](https://onbjerg.github.io/foundry-book/reference/config.html).
 
-Hardhat uses NPM to manage dependencies, which all its pros and cons. If you're familiar with Node.js or Javascript projects, you'll know how it works.
-
-In Foundry, dependencies are installed with `forge install`, which saves them in the `lib` folder. Foundry uses Git submodules to handle dependencies which means you can **install as a dependency any repository** that has smart contracts. To install a dependency you'll have to run `forge install GitHub-Organization-name/repository-name`. For example, if you want to install Openzeppelin smart contracts, you'll to run `forge install OpenZeppelin/openzeppelin-contracts`.
-
-We can also install a specific branch or tag appending `@tag-name` to the dependency name.
-
-After installing a dependency, we can run `forge remappings` and it'll print the remappings that foundry will use by default. For example, after installing Openzeppelin contracts, this is what `forge remappings` returns:
+The remappings is one of the most important parameters and it's used to manage dependency imports. You can use remappings to make imports less verbose in the contracts. You have to define a key-value pair in the remappings section of the `foundry.toml` file, where the value is the path to the contract folder you want to import. For example you could create the following remapping:
 
 ```sh
-forge remappings
-openzeppelin-contracts/=/Users/antonio/Chainstack/foundry-tutorial/demo-foundry/lib/openzeppelin-contracts/
-ds-test/=/Users/antonio/Chainstack/foundry-tutorial/demo-foundry/lib/ds-test/src/
+remappings = ['ds-test/=lib/ds-test/src/',
+# Shortcut to OpenZeppelin ERC20 token folder
+ 'openzeppelin-erc20/=lib/openzeppelin-contracts/contracts/token/ERC20/'
+]
 ```
 
-This means that I could use imports in my own contracts like this:
+And then import the ERC20 token contract like this:
 
 ```js
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.10;
 
-// openzeppelin-contracts remapping points to /lib/openzeppelin-contracts/ inside my project folder by default
-import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+pragma solidity ^0.8.4;
 
-contract Contract is ERC20 {
-    constructor() ERC20("MyToken", "MTKN") {
-        // mints 1 million tokens
-        _mint(msg.sender, 1000000 * (10**uint256(18)));
-    }
+// With remapping shortcut
+import {ERC20} from "openzeppelin-erc20/ERC20.sol";
+// Default import
+// import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+
+contract MyToken is ERC20 {
+  // Contract code
 }
 
 ```
 
+## Dependencies
+
+Hardhat uses NPM to manage dependencies, with all its pros and cons. If you're familiar with Node.js or Javascript projects, you'll know how it works. To install OpenZeppelin contracts, you'd run `npm install @openzeppelin/contracts` and you're good to go.
+
+In Foundry, dependencies are installed with the `forge` CLI tool, and are saved them in the `lib` folder. Foundry uses Git submodules to handle dependencies which means you can **install as a dependency any repository** that has smart contracts, and they'll be included in a `.gitmodules` file instead of th `package.json` used in NPM projects. To install a dependency you'll have to run `forge install GitHub-Organization-name/repository-name`. For example, if you want to install Openzeppelin smart contracts, you'll to run `forge install OpenZeppelin/openzeppelin-contracts`. You can also install a specific branch or tag appending `@tag-name` to the dependency name.
+
+After installing a dependency, you can run `forge remappings` and it'll print the remappings that foundry will use by default. For example, after installing Openzeppelin contracts, this is what `forge remappings` returns:
+
+```sh
+forge remappings
+openzeppelin-contracts/=/Users/antonio/Chainstack/foundry-tutorial/foundry-demo/lib/openzeppelin-contracts/
+ds-test/=/Users/antonio/Chainstack/foundry-tutorial/foundry-demo/lib/ds-test/src/
+```
+
+As mentioned earlier, you can create shortcuts by adding different remappings in the `foundry.toml` file or even in a specific remappings.txt file.
+
 ## Logging
 
-One of the tricky things coming from Hardhat is using `console.log()`.
+One of things that improves the developer experience in Hardhat is using `console.log()`. Using `console.log()` is a very quick and popular way to debug and track errors in Javascript, and Hardhat provides a similar API out of the box, which is super useful. They even mention it in their landing page!
 
-With Hardhat, you can import this contract library that provides methods to print in the terminal which is super useful. But obviously, if you try to compile a Hardhat contract that uses the `console.log`, you 'll get an error as the dependency is not there. You could install it as a dependency (which you can do via `forge install NomicFoundation/hardhat` and import it from [_/packages/hardhat-core/console.sol_](https://github.com/NomicFoundation/hardhat/blob/master/packages/hardhat-core/console.sol)) but [the recommended option](https://github.com/gakonst/foundry/tree/master/forge#consolelog) is to copy [this contract](https://github.com/gakonst/foundry/blob/master/evm-adapters/testdata/console.sol) into your project, and import it wherever you want to use `console.log`. It's not ideal, but they'll come up with a better option soon.
+![Hardhat console.log](./img/hardhat-console-log.jpg)
 
-**If you just need to write logs in your test files, you don't need any dependencies.** The included-by-default [DSTest contract](https://github.com/dapphub/ds-test/blob/master/src/test.sol), comes with assertions and logging events so you just need to emit any of the available events, like `emit log_string()` or `emit log_int()`, `emit log_address()` etc.
+Obviously, if you try to compile a Hardhat contract that uses the `console.log` with Foundry, you 'll get an error as the dependency is not there. You could install it ( via `forge install NomicFoundation/hardhat`) and import it (from [/hardhat-core/console.sol](https://github.com/NomicFoundation/hardhat/blob/master/packages/hardhat-core/console.sol)) but [the recommended option](https://github.com/gakonst/foundry/tree/master/forge#consolelog) is to copy [this contract](https://github.com/gakonst/foundry/blob/master/evm-adapters/testdata/console.sol) into your project, and import it wherever you want to use `console.log`. It's not ideal, but I'm sure they'll come up with a better option soon.
 
-## Hardhat vs Foundry: Writting Tests
+But **if you just need to write logs in your test files, you don't need any dependencies, at all.** The included-by-default [DSTest contract](https://github.com/dapphub/ds-test/blob/master/src/test.sol), comes with assertions and logging events so you just need to emit any of the available events, like `emit log_string()` or `emit log_int()`, `emit log_address()` etc.
 
-Testing is probably on the the most different aspects between Hardhat and Foundry. To compare them, I created a basic smart contract that simulates a bank and allow users to open accounts, deposit and withdraw ether, close the account, and return the number of active accounts. You can [find the code here]().
+## Writting Tests
 
-In Hardhat, you write your tests in Javascript using the _describe_ and _it_ keywords to define all different scenarios, and use Mocha as the default assertion library. Using Hardhat, this would be a testing file for the MiniBank contract:
+**Testing is probably on the the most different aspects between Hardhat and Foundry.** To compare them, I created **the same contract and tests with both Hardhat and Foundry**. The contract is a MiniBank contract that allow users to open accounts, deposit and withdraw ether, close the account, and return the number of active accounts. You can [find the code in the following repo](https://github.com/chainstack/foundry-vs-hardhat).
+
+In Hardhat, you write your tests in Javascript using the _describe_ and _it_ keywords to define all different scenarios, and use Mocha as the default assertion library. Using Hardhat, this would be part of the testing file for the MiniBank contract:
 
 ```js
 const { expect } = require('chai')
@@ -83,6 +96,27 @@ describe('MinBank contract', function () {
 
   it('Should return the number of opened accounts', async function () {
     expect(await miniBankContract.accountsOpened()).to.equal(0)
+  })
+  it('Should allow multiple users to open accounts', async function () {
+    await miniBankContract.connect(user1).openAccount()
+    await miniBankContract.connect(user2).openAccount()
+    await miniBankContract.connect(user3).openAccount()
+
+    expect(await miniBankContract.accountsOpened()).to.equal(3)
+  })
+
+  it('Should prevent users to open a second account', async function () {
+    await miniBankContract.connect(user1).openAccount()
+
+    await expect(
+      miniBankContract.connect(user1).openAccount()
+    ).to.be.revertedWith('MiniBank: User has an account already!')
+  })
+  it('Should allow users to deposit ETH', async () => {
+    await miniBankContract.connect(user1).openAccount()
+
+    await miniBankContract.connect(user1).deposit({ value: 1 })
+    expect(await miniBankContract.connect(user1).checkBalance()).to.equal(1)
   })
 })
 ```
@@ -106,14 +140,46 @@ import "../MiniBank.sol";
 
 // required for expect revert and other cheats
 interface Vm {
+    // to assert returned contract errors
     function expectRevert(bytes calldata) external;
 
+    // to change user interacting with the contract
+    function prank(address) external;
 }
 
 contract MiniBankTest is DSTest {
     MiniBank minibank;
     // required for expect revert and other cheats
-    Vm vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+    // HEVM_ADDRESS is 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+    Vm vm = Vm(HEVM_ADDRESS);
+
+    function setUp() public {
+        minibank = new MiniBank();
+    }
+
+    function testReturnsOpenedAccounts() public {
+        assertEq(0, minibank.accountsOpened());
+    }
+
+    function testUserOpensAcount() public {
+        minibank.openAccount();
+        assertEq(1, minibank.accountsOpened());
+    }
+     function testMultipleUsersOpenAccount() public {
+        minibank.openAccount();
+        // injects change of user
+        vm.prank(address(1));
+        minibank.openAccount();
+        vm.prank(address(2));
+        minibank.openAccount();
+
+        assertEq(3, minibank.accountsOpened());
+    }
+    function testAllowUsersDepositEth() public {
+        minibank.openAccount();
+        minibank.deposit{value: 1 ether}();
+        assertEq(1 ether, minibank.checkBalance());
+    }
 
 }
 
@@ -121,8 +187,8 @@ contract MiniBankTest is DSTest {
 
 There's a lot going on here so let's review the basics:
 
-- The test contract inherits from DSTest
-- We have to import the contract we want to test and instantiate it inside the`setUp()` method., which is similar to the `beforeEach` in Javascript tests.
+- The test contract inherits from `DSTest`.
+- We have to import the contract we want to test and instantiate it inside the`setUp()` method, which is similar to the `beforeEach` in Javascript tests.
 - Each test is a public function which name starts with _test_ or _testFail_.
 - Inside each test, we can call the contract methods using the contract instance created in the `setUp()`.
 - To send ETH to a contract method, you have to use `contract.methodName{value: 1 ether}();`
@@ -140,10 +206,10 @@ To use these cheatcodes, first, we need to create an interface and define all th
 ```js
 // required for expect revert and other cheats
 interface Vm {
-    // to assert returned contract errors
-    function expectRevert(bytes calldata) external;
-    // to change user interacting with the contract
-    function prank(address) external;
+  // to assert returned contract errors
+  function expectRevert(bytes calldata) external;
+  // to change user interacting with the contract
+  function prank(address) external;
 }
 
 ```
@@ -152,7 +218,7 @@ Second, we need to create a state variable that uses that interface as its type 
 
 ```js
 // HEVM_ADDRESS is 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
-    Vm vm = Vm(HEVM_ADDRESS);
+Vm vm = Vm(HEVM_ADDRESS);
 ```
 
 But what is that HEVM_ADDRESS? It's a pre-defined contract address that contains all the cheat methods. Here's how they explain it in the docs:
@@ -184,22 +250,13 @@ Once we have an instance of the cheats contract available, we can use it in our 
 
 ```
 
-Changing the user with `vm.prank()` or the current block with `vm.roll()` before calling a contract method is easy to understand as you're changing the status of the blockchain or the user, but `vm.expectRevert()` is weird. It's like doing the assertion before actually calling the method 😵‍💫 But once you get your head around that, cheats are pretty cool and easy to use.
+Changing the user with `vm.prank()` or the current block with `vm.roll()` before calling a contract method is easy to understand as you're changing the user or the status of the blockchain, but `vm.expectRevert()` is weird. It's like doing the assertion before actually calling the method 😵‍💫 But once you get your head around that, cheats are pretty cool and easy to use.
 
-On the other hand, writing tests in solidity means not having to deal with so many `async/await` methods.
+On the other hand, writing tests in solidity means not having to deal with so many `async/await` methods, which means writing less code.
 
 > `vm.expectRevert()` is weird. It's like doing the assertion before actually calling the method 😵‍💫
 
-Here is a list of what I consider pros and cons writing tests with Foundry:
-
-| Pros                      | Cons                                                                        | Neither                  |
-| ------------------------- | --------------------------------------------------------------------------- | ------------------------ |
-| No async/await            | Test names not as descriptive as in JS tests                                | tests writen in solidity |
-| Tests require less code   | Cheats are difficult to understand at first                                 |
-| Tests run super fast      | `expectRevert` assertion is weird                                           |
-| Auto-generated gas report | `testFail` only tests if the test fails, not if the error is what we expect |
-
-### Running tests
+### Running tests: performance
 
 When it comes to running the tests, the first thing I noticed was how fast Foundry was. I've used the same contract with the same number of tests and same scenarios, the only difference was that I wrote the tests for the Hardhat project in Javascript while I wrote them in Solidity for Foundry.
 
@@ -213,18 +270,25 @@ In a small project like this, the difference may not be that important but in bi
 
 I also wanted to try compiling a larger project, so I cloned [GEB](https://github.com/reflexer-labs/geb), which has 26 smart contracts. I had to reorganise the project files and install all the dependencies but I was able to time how long it took to compile all the contracts in both cases. **With Hardhat, it took 14.56 seconds and with Foundry it took 8.53 seconds 💨**
 
+Here is a list of what I consider pros and cons of writing tests with Foundry:
+
+| Pros                      | Cons                                                                        | Neither                  |
+| ------------------------- | --------------------------------------------------------------------------- | ------------------------ |
+| No async/await            | Test names not as descriptive as in JS tests                                | tests writen in solidity |
+| Tests require less code   | Cheats are difficult to understand at first                                 |
+| Tests run super fast      | `expectRevert` assertion is weird                                           |
+| Auto-generated gas report | `testFail` only tests if the test fails, not if the error is what we expect |
+
 ## Deploying contracts
 
 One of the aspects I like about Hardhat is that you can write deployment scripts in Javascript and target different networks, or use the `dotenv` package to load the RPC endpoints and private keys from environment variables. It makes deployments easy to write and to share.
 
-In Foundry, deployments are run from the CLI like this: `$ forge create --rpc-url <your_rpc_url> --private-key <your_private_key> src/MyContract.sol:MyContract` which is not ideal. And if you need to pass some arguments to the contract's constructor, this gets completly out of hand: `$ forge create --rpc-url <your_rpc_url> --constructor-args "MyToken" "MTKN" 18 1000000000000000000000 --private-key <your_private_key> src/MyToken.sol:MyToken`.
+In Foundry, deployments are run from the CLI like this: `forge create --rpc-url <your_rpc_url> --private-key <your_private_key> src/MyContract.sol:MyContract` which is not ideal. And if you need to pass some arguments to the contract's constructor, this gets completly out of hand: `forge create --rpc-url <your_rpc_url> --constructor-args "MyToken" "MTKN" 18 1000000000000000000000 --private-key <your_private_key> src/MyToken.sol:MyToken`.
 
-I asked about a more convenient approach to this in the Foundry Telegram channel and they mentioned that I could create a bash script. I even found [a GitHub repo](https://github.com/smartcontractkit/foundry-starter-kit) (credits to [Patrick Collins](https://twitter.com/PatrickAlphaC)) with some step-by-step scripts to make the deployment a little bit easier.
+I asked about a more convenient approach to this in the Foundry Telegram channel and they recommended creating a bash script. I even found [a GitHub repo](https://github.com/smartcontractkit/foundry-starter-kit) (credits to [Patrick Collins](https://twitter.com/PatrickAlphaC)) with some step-by-step scripts to make the deployment a little bit easier.
 In addition, **[the team is working on new ways to deploy contracts](https://github.com/gakonst/foundry/issues/402#issuecomment-1022530001)** and even make deployments available in the tests in order to, for example, run some tests against a contract after it's being deployed.
 
 It sounds great and I'm sure the team will have something move convinient really soon.
-
-##
 
 ### Final thoughts
 
@@ -237,15 +301,17 @@ If you're want to give it a try, make sure to join [the Foundry Telegram channel
 ## Summary of differences
 
 |                                                          | Foundry                                                                                     | Hardhat                                                                             |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --- |
-| Installation                                             | via CLI curl command                                                                        | via NPM or not required with NPX                                                    |
-| CLI tools                                                | **forge** to manage the project (build/compile) & **cast** to interact with smart contracts | **hardhat** manage the project (build/compile)                                      |
-| Configuration file                                       | foundry.toml                                                                                | hardhat.config.js                                                                   |
-| Allows project folder configuration                      | Yes, in foundry.toml file                                                                   | Yes, in hardhat.config.js file                                                      |
-| Dependency management                                    | GitHub submodules (any repository)                                                          | NPM packages                                                                        |     |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --- | --- |
+| Installation                                             | via CLI curl command                                                                        | not required with NPX, or via NPM                                                   |
+| CLI tools                                                | **forge** to manage the project (build/compile) & **cast** to interact with smart contracts | **hardhat** manage the project (build/compile/run scripts)                          |
+| Performance                                              | 💨💨💨💨💨                                                                                  | 🐢🐢                                                                                |
+| Configuration file                                       | `foundry.toml`                                                                              | `hardhat.config.js`                                                                 |
+| Allows project folder configuration                      | Yes, in `foundry.toml` file                                                                 | Yes, in `hardhat.config.js` file                                                    |
+| Dependency management                                    | GitHub submodules (any repository)                                                          | NPM packages                                                                        |
+| Dependencies file                                        | .gitmodules                                                                                 | package.json                                                                        |     |     |
 | Files included in sample project                         | empty smart contract and basic test                                                         | Greeter smart contract (with set/get methods), test files and script to run locally |
 | Test file format                                         | Solidity contracts                                                                          | JavaScript test files                                                               |
 | Test assertion library (default)                         | ds-test                                                                                     | Mocha                                                                               |
-| Allows to alter blockchain status (time, block) in tests | Yes via cheatcodes                                                                          | Limited, via mainnetforking.                                                        |
+| Allows to alter blockchain status (time, block) in tests | Yes via cheatcodes                                                                          | Limited, via mainnet forking.                                                       |
 | Allows run specific tests?                               | Yes via --match-test --match-contract                                                       | Yes via "only" or "skip" in test files                                              |
 | Allows deployments?                                      | Yes, via forge CLI or Bash scripts (new solutions in progress)                              | Yes, via JS scripts                                                                 |

@@ -323,8 +323,8 @@ If you're want to give it a try, make sure to join [the Foundry Telegram channel
 
 ## Summary of differences
 
-|                                                          | Foundry                                                                                     | Hardhat                                                                             |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --- | --- |
+|           | Foundry         | Hardhat          |
+| -------------------------- | --------------------------------- | -------------------------------------- |
 | Installation                                             | via CLI curl command                                                                        | not required with NPX, or via NPM                                                   |
 | CLI tools                                                | **forge** to manage the project (build/compile) & **cast** to interact with smart contracts | **hardhat** manage the project (build/compile/run scripts)                          |
 | Build & test performance                                 | 💨💨💨💨💨                                                                                  | 🐢🐢                                                                                |

@@ -4,7 +4,7 @@ This repository contains two similar projects built with Hardhat and Foundry, wh
 
 ## Differences
 
-|                                                          | Foundry                                                                                     | Hardhat                                                                             |
+| Description                                              | Foundry                                                                                     | Hardhat                                                                             |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --- | --- |
 | Installation                                             | via CLI curl command                                                                        | not required with NPX, or via NPM                                                   |
 | CLI tools                                                | **forge** to manage the project (build/compile) & **cast** to interact with smart contracts | **hardhat** manage the project (build/compile/run scripts)                          |

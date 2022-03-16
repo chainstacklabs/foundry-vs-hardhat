@@ -1,6 +1,6 @@
 I've been using Hardhat since my first Solidity project. Back when I started learning solidity, I wasn't sold on the idea of working with an online IDE like [Remix](https://remix.ethereum.org/), and [Hardhat](https://hardhat.org/) was the most recommended option (although Truffle was close behind). After some months using it for almost all my solidity projects, I'm pretty used to it, how the different networks and project folders can be configured, how to write tests and I've even came up with an almost perfect (at least for me) project structure that I always use when I want to create a web 3 app.
 
-A few weeks ago, one of my team mates talked to me about Foundry and performance was the main selling point. It really picked my curiosity so I decided to [install it](https://onbjerg.github.io/foundry-book/getting-started/installation.html) and [created a quick project](https://onbjerg.github.io/foundry-book/forge/creating-a-new-project.html) to **compare the differences between Foundry and Hardhat buiding the same project.**
+A few weeks ago, one of my team mates talked to me about Foundry and performance was the main selling point. It really picked my curiosity so I decided to [install it](https://onbjerg.github.io/foundry-book/getting-started/installation.html) and [created a quick project](https://github.com/chainstack/foundry-vs-hardhat) to **compare the differences between Foundry and Hardhat buiding the same project.**
 
 ---
 
@@ -301,6 +301,18 @@ In addition, **[the team is working on new ways to deploy contracts](https://git
 
 It sounds great and I'm sure the team will have something move convinient really soon.
 
+## Cast CLI tool
+
+Foundry includes the `cast` CLI tool which allows you to interact with the blockchain or a smart contract. You'd need an RPC endpoint to run most commands so make sure to [sign up in Chainstack and get your rpc endpoint for free](https://console.chainstack.com/user/account/create).
+
+In summary, you can query the blockchain by block, get information about wallets and call any smart contract methods.
+
+For example, if you wanted to call the `balanceOf(address)` method of the USDC ERC20 token contract ( which address address is 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48), you'll run: `$ cast call "balanceOf(address)(uint256)" "0x123456...." --rpc-url https://my-rpc-endpoint/abcdef`.
+
+It's a useful tool and pretty fast as well but, similar to deploying contracts, it requires creating bash scripts to avoid writing super long commands.
+
+You can find [all the available methods here](https://onbjerg.github.io/foundry-book/reference/cast.html).
+
 ### Final thoughts
 
 Foundry is not 100% complete but it's evolving and it looks promising. Performance is awesome, there is a great and very active community around the project and [their Telegram channel](https://t.me/foundry_rs) is filled with discussions about new features and how to make it a better development tool.
@@ -326,3 +338,4 @@ If you're want to give it a try, make sure to join [the Foundry Telegram channel
 | Allows to alter blockchain status (time, block) in tests | Yes via cheatcodes                                                                          | Limited, via mainnet forking.                                                       |
 | Allows run specific tests?                               | Yes via --match-test --match-contract                                                       | Yes via "only" or "skip" in test files                                              |
 | Contract deployments                                     | Via forge CLI or Bash scripts (new solutions in progress)                                   | Via JS scripts                                                                      |
+| Blockchain / contracts interaction                       | via Cast CLI tool                                                                           | N/A                                                                                 |

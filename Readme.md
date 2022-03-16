@@ -4,8 +4,9 @@ This repository contains two similar projects built with Hardhat and Foundry, wh
 
 ## Differences
 
-| Description                                              | Foundry                                                                                     | Hardhat                                                                             |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --- | --- |
+
+|           | Foundry         | Hardhat          |
+| -------------------------- | --------------------------------- | -------------------------------------- |
 | Installation                                             | via CLI curl command                                                                        | not required with NPX, or via NPM                                                   |
 | CLI tools                                                | **forge** to manage the project (build/compile) & **cast** to interact with smart contracts | **hardhat** manage the project (build/compile/run scripts)                          |
 | Build & test performance                                 | 💨💨💨💨💨                                                                                  | 🐢🐢                                                                                |
@@ -21,7 +22,7 @@ This repository contains two similar projects built with Hardhat and Foundry, wh
 | Contract deployments                                     | Via forge CLI or Bash scripts (new solutions in progress)                                   | Via JS scripts                                                                      |
 | Blockchain / contracts interaction                       | via Cast CLI tool                                                                           | N/A                                                                                 |
 
-## Project structure vs Hardhat
+## Default project structure vs Hardhat
 
 | Files          | Foundry   | Hardhat       |
 | -------------- | --------- | ------------- |

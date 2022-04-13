@@ -1,6 +1,8 @@
 # Hardhat vs Foundry
 
-This repository contains two similar projects built with Hardhat and Foundry, which have been used to support an article published in [Chainstack's blog](https://chainstack.com/blog/).
+**[You can read the full article for this project in the Chainstack blog](https://chainstack.com/foundry-hardhat-differences-performance/)**
+
+This repository contains two similar projects built with Hardhat and Foundry.
 
 ## Differences
 
